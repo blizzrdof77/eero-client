@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import click
+from argparse import ArgumentParser
 import dateutil.parser
 import eero
 from eero.cookie_store import CookieStore
@@ -10,8 +11,8 @@ session = CookieStore("session.cookie")
 eero = eero.Eero(session)
 
 
-def print_json(data):
-    click.echo(json.dumps(data, indent=4, sort_keys=True))
+def print_json(data, sort=True):
+    click.echo(json.dumps(data, indent=4, sort_keys=sort))
 
 
 @click.group()
@@ -119,6 +120,21 @@ def networks():
     """ Shows available networks. (Generally one) """
     for network in account()["networks"]["data"]:
         print(network["url"])
+
+
+@cli.command()
+def details():
+    """ Show your network configuration in detail. (Generally one) """
+    for network in account()["networks"]["data"]:
+        network_details = eero.networks(network['url'])
+        print_json(network_details, False)
+
+
+@cli.command()
+def info():
+    """ Show your network info. (Generally one) """
+    for network in account()["networks"]["data"]:
+        print_json(network, False)
 
 
 @cli.command()

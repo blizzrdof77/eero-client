@@ -1,3 +1,4 @@
+session.amazon.cookie
 *.egg-info
 *.pyc
 .DS_Store
