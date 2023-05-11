@@ -10,6 +10,25 @@ import pandas as pd
 session = CookieStore("session.cookie")
 eero = eero.Eero(session)
 
+COMMANDS = [
+    'details',
+    'device',
+    'devices',
+    'eeros',
+    'info',
+    'login',
+    'networks',
+    'reboot',
+    'summary',
+    'speedtest',
+    'speedtests',
+    'clients',
+    'diagnostics',
+    'resources',
+    'forwards',
+    'reservations',
+    'profiles'
+]
 
 def print_json(data, sort=True):
     click.echo(json.dumps(data, indent=4, sort_keys=sort))
@@ -34,16 +53,79 @@ def login():
         click.echo("Login successful. Rerun this command to get some output.")
 
 
-def account():
+def account_info():
     return eero.account()
+
+
+@cli.command()
+def account():
+    """ Show your eero user account details """
+    print_json(account_info())
 
 
 @cli.command()
 def devices():
     """ Show all the devices connected to your network """
-    for network in account()["networks"]["data"]:
+    for network in account_info()["networks"]["data"]:
         devices = eero.devices(network["url"])
         print_json(devices)
+
+
+@cli.command()
+def reservations():
+    """ Show all network reservations """
+    for network in account_info()["networks"]["data"]:
+        network_id = eero.id_from_url(network["url"])
+        results = eero.reservations(network_id)
+        print_json(results, False)
+
+
+@cli.command()
+def forwards():
+    """ Show all network port forwarding rules """
+    for network in account_info()["networks"]["data"]:
+        network_id = eero.id_from_url(network["url"])
+        results = eero.forwards(network_id)
+        print_json(results, False)
+
+
+@cli.command()
+def profiles():
+    """ Show all account and network profiles """
+    for network in account_info()["networks"]["data"]:
+        network_id = eero.id_from_url(network["url"])
+        results = eero.profiles(network_id)
+        print_json(results, False)
+
+
+@cli.command()
+def diagnostics():
+    """ Show all network diagnostics """
+    for network in account_info()["networks"]["data"]:
+        network_id = eero.id_from_url(network["url"])
+        results = eero.diagnostics(network_id)
+        print_json(results, False)
+
+
+@cli.command()
+@click.option("--last", is_flag=True, default=False)
+def speedtests():
+    """ Show your recent network speed test results """
+    for network in account_info()["networks"]["data"]:
+        network_id = eero.id_from_url(network["url"])
+        results = eero.get_speed_test(network_id)
+        if last:
+            print_json(results[0])
+        else:
+            print_json(results, False)
+
+
+@cli.command()
+def speedtest():
+    """ Run a new network speed test """
+    for network in account_info()["networks"]["data"]:
+        network_id = eero.id_from_url(network["url"])
+        print("Running speed test...")
 
 
 @cli.command()
@@ -51,7 +133,7 @@ def devices():
 def eeros(verbose):
     """ Shows all the eeros on your network """
     summary_erros = []
-    for network in account()["networks"]["data"]:
+    for network in account_info()["networks"]["data"]:
         es = eero.eeros(network["url"])
         for e in es:
             if verbose:
@@ -91,9 +173,9 @@ def get_bitrate(bitrate):
 @cli.command()
 @click.option("--recent", is_flag=True, default=True)
 def summary(recent):
-    """ Summary of your network (This contains the most information) """
+    """ Summary of your network """
     summary_score = []
-    for network in account()["networks"]["data"]:
+    for network in account_info()["networks"]["data"]:
         devices = eero.devices(network["url"])
         for device in devices:
             ds = {}
@@ -118,22 +200,30 @@ def summary(recent):
 @cli.command()
 def networks():
     """ Shows available networks. (Generally one) """
-    for network in account()["networks"]["data"]:
+    for network in account_info()["networks"]["data"]:
         print(network["url"])
 
 
 @cli.command()
 def details():
     """ Show your network configuration in detail. (Generally one) """
-    for network in account()["networks"]["data"]:
+    for network in account_info()["networks"]["data"]:
         network_details = eero.networks(network['url'])
         print_json(network_details, False)
 
 
 @cli.command()
+def resources():
+    """ Show your network resources. """
+    for network in account_info()["networks"]["data"]:
+        resources = eero.resources(network['url'])
+        print_json(resources, False)
+
+
+@cli.command()
 def info():
     """ Show your network info. (Generally one) """
-    for network in account()["networks"]["data"]:
+    for network in account_info()["networks"]["data"]:
         print_json(network, False)
 
 

@@ -95,6 +95,46 @@ class Eero(object):
             )
         )
 
+    def forwards(self, network_id):
+        return self.refreshed(
+            lambda: self.client.get_alt(
+                "networks/{}/forwards".format(network_id),
+                cookies=self._cookie_dict,
+            )
+        )
+
+    def reservations(self, network_id):
+        return self.refreshed(
+            lambda: self.client.get(
+                "networks/{}/reservations".format(network_id),
+                cookies=self._cookie_dict,
+            )
+        )
+
+    def profiles(self, network_id):
+        return self.refreshed(
+            lambda: self.client.get(
+                "networks/{}/profiles".format(network_id),
+                cookies=self._cookie_dict,
+            )
+        )
+
+    def diagnostics(self, network_id):
+        return self.refreshed(
+            lambda: self.client.get(
+                "networks/{}/diagnostics".format(network_id),
+                cookies=self._cookie_dict,
+            )
+        )
+
+    def profiles(self, network_id):
+        return self.refreshed(
+            lambda: self.client.get(
+                "networks/{}/profiles".format(network_id),
+                cookies=self._cookie_dict,
+            )
+        )
+
     def reboot(self, device_id):
         return self.refreshed(
             lambda: self.client.post(
